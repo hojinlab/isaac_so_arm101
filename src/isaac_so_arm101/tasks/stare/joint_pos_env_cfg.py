@@ -18,7 +18,7 @@
 import isaaclab_tasks.manager_based.manipulation.reach.mdp as mdp
 from isaaclab.utils import configclass
 from isaac_so_arm101.robots import SO_ARM100_CFG, SO_ARM101_CFG  # noqa: F401
-from isaac_so_arm101.tasks.reach.reach_env_cfg import ReachEnvCfg
+from isaac_so_arm101.tasks.stare.stare_env_cfg import StareEnvCfg
 
 ##
 # Scene definition
@@ -26,7 +26,7 @@ from isaac_so_arm101.tasks.reach.reach_env_cfg import ReachEnvCfg
 
 
 @configclass
-class SoArm100ReachEnvCfg(ReachEnvCfg):
+class SoArm100StareEnvCfg(StareEnvCfg):
     def __post_init__(self):
         # post init of parent
         super().__post_init__()
@@ -54,7 +54,7 @@ class SoArm100ReachEnvCfg(ReachEnvCfg):
 
 
 @configclass
-class SoArm100ReachEnvCfg_PLAY(SoArm100ReachEnvCfg):
+class SoArm100StareEnvCfg_PLAY(SoArm100StareEnvCfg):
     def __post_init__(self):
         # post init of parent
         super().__post_init__()
@@ -66,7 +66,7 @@ class SoArm100ReachEnvCfg_PLAY(SoArm100ReachEnvCfg):
 
 
 @configclass
-class SoArm101ReachEnvCfg(ReachEnvCfg):
+class SoArm101StareEnvCfg(StareEnvCfg):
     def __post_init__(self):
         # post init of parent
         super().__post_init__()
@@ -94,7 +94,7 @@ class SoArm101ReachEnvCfg(ReachEnvCfg):
 
 
 @configclass
-class SoArm101ReachEnvCfg_PLAY(SoArm101ReachEnvCfg):
+class SoArm101StareEnvCfg_PLAY(SoArm101StareEnvCfg):
     def __post_init__(self):
         # post init of parent
         super().__post_init__()
