@@ -19,6 +19,10 @@ import isaaclab_tasks.manager_based.manipulation.reach.mdp as mdp
 from isaaclab.utils import configclass
 from isaac_so_arm101.robots import SO_ARM100_CFG, SO_ARM101_CFG  # noqa: F401
 from isaac_so_arm101.tasks.stare.stare_env_cfg import StareEnvCfg
+from isaaclab.assets import RigidObjectCfg
+from isaaclab.sim.schemas.schemas_cfg import RigidBodyPropertiesCfg
+from isaaclab.sim.spawners.from_files.from_files_cfg import UsdFileCfg
+from isaaclab.utils.assets import ISAAC_NUCLEUS_DIR
 
 ##
 # Scene definition
@@ -34,9 +38,9 @@ class SoArm100StareEnvCfg(StareEnvCfg):
         # switch robot to franka
         self.scene.robot = SO_ARM100_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot")
         # override rewards
-        self.rewards.end_effector_position_tracking.params["asset_cfg"].body_names = ["gripper"]
-        self.rewards.end_effector_position_tracking_fine_grained.params["asset_cfg"].body_names = ["gripper"]
-        self.rewards.end_effector_orientation_tracking.params["asset_cfg"].body_names = ["gripper"]
+        # self.rewards.end_effector_position_tracking.params["asset_cfg"].body_names = ["gripper"]
+        # self.rewards.end_effector_position_tracking_fine_grained.params["asset_cfg"].body_names = ["gripper"]
+        # self.rewards.end_effector_orientation_tracking.params["asset_cfg"].body_names = ["gripper"]
 
         # TODO: reorient command target
 
@@ -49,7 +53,7 @@ class SoArm100StareEnvCfg(StareEnvCfg):
         )
         # override command generator body
         # end-effector is along z-direction
-        self.commands.ee_pose.body_name = ["gripper"]
+        # self.commands.ee_pose.body_name = ["gripper"]
         # self.commands.ee_pose.ranges.pitch = (math.pi, math.pi)
 
 
@@ -74,11 +78,11 @@ class SoArm101StareEnvCfg(StareEnvCfg):
         # switch robot to franka
         self.scene.robot = SO_ARM101_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot")
         # override rewards
-        self.rewards.end_effector_position_tracking.params["asset_cfg"].body_names = ["gripper_link"]
-        self.rewards.end_effector_position_tracking_fine_grained.params["asset_cfg"].body_names = ["gripper_link"]
-        self.rewards.end_effector_orientation_tracking.params["asset_cfg"].body_names = ["gripper_link"]
+        # self.rewards.end_effector_position_tracking.params["asset_cfg"].body_names = ["gripper_link"]
+        # self.rewards.end_effector_position_tracking_fine_grained.params["asset_cfg"].body_names = ["gripper_link"]
+        # self.rewards.end_effector_orientation_tracking.params["asset_cfg"].body_names = ["gripper_link"]
 
-        self.rewards.end_effector_orientation_tracking.weight = 0.0
+        # self.rewards.end_effector_orientation_tracking.weight = 0.0
 
         # override actions
         self.actions.arm_action = mdp.JointPositionActionCfg(
@@ -89,8 +93,27 @@ class SoArm101StareEnvCfg(StareEnvCfg):
         )
         # override command generator body
         # end-effector is along z-direction
-        self.commands.ee_pose.body_name = ["gripper_link"]
+        # self.commands.ee_pose.body_name = ["gripper_link"]
         # self.commands.ee_pose.ranges.pitch = (math.pi, math.pi)
+
+        self.scene.object = RigidObjectCfg(
+            prim_path="{ENV_REGEX_NS}/Object",
+            init_state=RigidObjectCfg.InitialStateCfg(pos=[0.2, 0.0, 0.015], rot=[1, 0, 0, 0]),
+            spawn=UsdFileCfg(
+                # usd_path=f"{ISAAC_NUCLEUS_DIR}/Props/Blocks/DexCube/dex_cube_instanceable.usd",
+                usd_path=f"{ISAAC_NUCLEUS_DIR}/Props/Blocks/red_block.usd",
+                scale=(0.5, 0.5, 0.5),
+                rigid_props=RigidBodyPropertiesCfg(
+                    solver_position_iteration_count=16,
+                    solver_velocity_iteration_count=1,
+                    max_angular_velocity=1000.0,
+                    max_linear_velocity=1000.0,
+                    max_depenetration_velocity=5.0,
+                    disable_gravity=False,
+                ),
+                semantic_tags=[("class", "red_block")],
+            ),
+        )
 
 
 @configclass

@@ -29,6 +29,8 @@ from isaaclab.scene import InteractiveSceneCfg
 from isaaclab.utils import configclass
 from isaaclab.utils.assets import ISAAC_NUCLEUS_DIR
 from isaaclab.utils.noise import AdditiveUniformNoiseCfg as Unoise
+from isaaclab.sensors import CameraCfg
+from isaaclab.sensors import TiledCameraCfg
 
 ##
 # Scene definition
@@ -63,6 +65,31 @@ class StareSceneCfg(InteractiveSceneCfg):
         spawn=sim_utils.DomeLightCfg(color=(0.75, 0.75, 0.75), intensity=2500.0),
     )
 
+    camera = TiledCameraCfg(
+        # prim_path="{ENV_REGEX_NS}/Robot/so101_new_calib/gripper_link/Camera",
+        prim_path="{ENV_REGEX_NS}/Robot/gripper_link/Camera",
+        height=480,
+        width=640,
+        data_types=["rgb", "semantic_segmentation"],
+        spawn=sim_utils.PinholeCameraCfg(
+            focal_length=18.147562,
+            clipping_range=(0.01, 1e7),
+        ),
+        offset=TiledCameraCfg.OffsetCfg(
+            pos=(0.0, -0.06, 0.0),
+            rot=(0.0, 0.0, -0.13053, 0.99144),
+            convention="opengl",
+        ),
+        # spawn=None,
+        # focal_length=18.147562,
+        # focus_distance=400.0,
+        # clipping_range=(0.01, 1e7),
+        # offset=CameraCfg.OffsetCfg(
+        #     pos=(0.0, -0.06, 0.0),
+        #     rot=(0.0, 0.0, -0.13053, 0.99144),
+        #     convention="world",
+        # ),
+    )
 
 ##
 # MDP settings
@@ -73,20 +100,20 @@ class StareSceneCfg(InteractiveSceneCfg):
 class CommandsCfg:
     """Command terms for the MDP."""
 
-    ee_pose = mdp.UniformPoseCommandCfg(
-        asset_name="robot",
-        body_name=MISSING,
-        resampling_time_range=(5.0, 5.0),
-        debug_vis=True,
-        ranges=mdp.UniformPoseCommandCfg.Ranges(
-            pos_x=(-0.1, 0.1),
-            pos_y=(-0.25, -0.1),
-            pos_z=(0.1, 0.3),
-            roll=(0.0, 0.0),
-            pitch=(0.0, 0.0),
-            yaw=(0.0, 0.0),
-        ),
-    )
+    # ee_pose = mdp.UniformPoseCommandCfg(
+    #     asset_name="robot",
+    #     body_name=MISSING,
+    #     resampling_time_range=(5.0, 5.0),
+    #     debug_vis=True,
+    #     ranges=mdp.UniformPoseCommandCfg.Ranges(
+    #         pos_x=(-0.1, 0.1),
+    #         pos_y=(-0.25, -0.1),
+    #         pos_z=(0.1, 0.3),
+    #         roll=(0.0, 0.0),
+    #         pitch=(0.0, 0.0),
+    #         yaw=(0.0, 0.0),
+    #     ),
+    # )
 
 
 @configclass
@@ -108,8 +135,11 @@ class ObservationsCfg:
         # observation terms (order preserved)
         joint_pos = ObsTerm(func=mdp.joint_pos_rel, noise=Unoise(n_min=-0.01, n_max=0.01))
         joint_vel = ObsTerm(func=mdp.joint_vel_rel, noise=Unoise(n_min=-0.01, n_max=0.01))
-        pose_command = ObsTerm(func=mdp.generated_commands, params={"command_name": "ee_pose"})
+        # pose_command = ObsTerm(func=mdp.generated_commands, params={"command_name": "ee_pose"})
         actions = ObsTerm(func=mdp.last_action)
+
+        # add: camera
+        object_pos_cam = ObsTerm(func=stare_mdp.red_block_centroid_in_camera)
 
         def __post_init__(self):
             self.enable_corruption = True
@@ -132,27 +162,37 @@ class EventCfg:
         },
     )
 
+    reset_object_position = EventTerm(
+        func=mdp.reset_root_state_uniform,
+        mode="reset",
+        params={
+            "pose_range": {"x": (0.1, 0.8), "y": (-0.4, 0.4), "z": (0.0, 0.0)},
+            "velocity_range": {},
+            "asset_cfg": SceneEntityCfg("object"),
+        },
+    )
+
 
 @configclass
 class RewardsCfg:
     """Reward terms for the MDP."""
 
-    # task terms
-    end_effector_position_tracking = RewTerm(
-        func=mdp.position_command_error,
-        weight=-0.2,
-        params={"asset_cfg": SceneEntityCfg("robot", body_names=MISSING), "command_name": "ee_pose"},
-    )
-    end_effector_position_tracking_fine_grained = RewTerm(
-        func=mdp.position_command_error_tanh,
-        weight=0.1,
-        params={"asset_cfg": SceneEntityCfg("robot", body_names=MISSING), "std": 0.1, "command_name": "ee_pose"},
-    )
-    end_effector_orientation_tracking = RewTerm(
-        func=mdp.orientation_command_error,
-        weight=-0.1,
-        params={"asset_cfg": SceneEntityCfg("robot", body_names=MISSING), "command_name": "ee_pose"},
-    )
+    # # task terms
+    # end_effector_position_tracking = RewTerm(
+    #     func=mdp.position_command_error,
+    #     weight=-0.2,
+    #     params={"asset_cfg": SceneEntityCfg("robot", body_names=MISSING), "command_name": "ee_pose"},
+    # )
+    # end_effector_position_tracking_fine_grained = RewTerm(
+    #     func=mdp.position_command_error_tanh,
+    #     weight=0.1,
+    #     params={"asset_cfg": SceneEntityCfg("robot", body_names=MISSING), "std": 0.1, "command_name": "ee_pose"},
+    # )
+    # end_effector_orientation_tracking = RewTerm(
+    #     func=mdp.orientation_command_error,
+    #     weight=-0.1,
+    #     params={"asset_cfg": SceneEntityCfg("robot", body_names=MISSING), "command_name": "ee_pose"},
+    # )
 
     # action penalty
     action_rate = RewTerm(func=mdp.action_rate_l2, weight=-0.0001)
@@ -160,6 +200,12 @@ class RewardsCfg:
         func=mdp.joint_vel_l2,
         weight=-0.0001,
         params={"asset_cfg": SceneEntityCfg("robot")},
+    )
+
+    camera_alignment = RewTerm(
+        func=stare_mdp.centroid_center_reward,
+        weight=1.0,
+        params={"std": 1.0},
     )
 
 

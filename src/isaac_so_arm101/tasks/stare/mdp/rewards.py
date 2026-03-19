@@ -15,8 +15,10 @@ from typing import TYPE_CHECKING
 import torch
 from isaaclab.assets import RigidObject
 from isaaclab.managers import SceneEntityCfg
+from isaaclab.sensors import Camera
 from isaaclab.sensors import FrameTransformer
 from isaaclab.utils.math import combine_frame_transforms
+from isaaclab.utils.math import subtract_frame_transforms
 
 if TYPE_CHECKING:
     from isaaclab.envs import ManagerBasedRLEnv
@@ -86,3 +88,51 @@ def object_ee_distance_and_lifted(
     lift_reward = object_is_lifted(env, minimal_height, object_cfg)
     # Combine rewards multiplicatively
     return stare_reward * lift_reward
+
+def object_in_camera_fov(
+    env: ManagerBasedRLEnv,
+    std: float,
+    camera_cfg: SceneEntityCfg = SceneEntityCfg("camera"),
+    object_cfg: SceneEntityCfg = SceneEntityCfg("object"),
+) -> torch.Tensor:
+
+    camera: Camera = env.scene[camera_cfg.name]
+    object: RigidObject = env.scene[object_cfg.name]
+
+    camera_pos_w = camera.data.pos_w
+    camera_quat_w = camera.data.quat_w_world
+    object_pos_w = object.data.root_pos_w[:, :3]
+
+    object_pos_cam, _ = subtract_frame_transforms(camera_pos_w, camera_quat_w, object_pos_w)
+
+    lateral = torch.sqrt(object_pos_cam[:, 1]**2 + object_pos_cam[:, 2]**2)
+    forward = object_pos_cam[:, 0]
+    angle = torch.atan2(lateral, forward)
+
+    return 1.0 - torch.tanh(angle / std)
+
+def centroid_center_reward(
+    env: ManagerBasedRLEnv,
+    std: float = 0.3,
+    camera_cfg: SceneEntityCfg = SceneEntityCfg("camera"),
+) -> torch.Tensor:
+
+    camera: Camera = env.scene[camera_cfg.name]
+    seg = camera.data.output["semantic_segmentation"]
+
+    H, W = seg.shape[1], seg.shape[2]
+    mask = (seg[..., 0] == 93) & (seg[..., 1] == 220) & (seg[..., 2] == 11)
+
+    reward = torch.zeros(env.num_envs, device=env.device)
+
+    for i in range(env.num_envs):
+        ys, xs = torch.where(mask[i])
+        if len(xs) > 0:
+            cx = xs.float().mean() / W
+            cy = ys.float().mean() / H
+            dist = torch.sqrt((cx - 0.5)**2 + (cy - 0.5)**2)
+            reward[i] = 1.0 - torch.tanh(dist / std)
+        else:
+            reward[i] = -1.0
+
+    return reward

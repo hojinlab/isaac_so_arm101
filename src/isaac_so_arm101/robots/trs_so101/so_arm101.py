@@ -11,29 +11,11 @@ TEMPLATE_ASSETS_DATA_DIR = Path(__file__).resolve().parent
 ##
 
 SO_ARM101_CFG = ArticulationCfg(
-    # spawn=sim_utils.UrdfFileCfg(
-    #     fix_base=True,
-    #     replace_cylinders_with_capsules=True,
-    #     asset_path=f"{TEMPLATE_ASSETS_DATA_DIR}/urdf/so_arm101.urdf",
-    #     activate_contact_sensors=False, # set as false while waiting for capsule implementation
-    #     rigid_props=sim_utils.RigidBodyPropertiesCfg(
-    #         disable_gravity=False,
-    #         max_depenetration_velocity=5.0,
-    #     ),
-    #     articulation_props=sim_utils.ArticulationRootPropertiesCfg(
-    #         enabled_self_collisions=True,
-    #         solver_position_iteration_count=8,
-    #         solver_velocity_iteration_count=0,
-    #     ),
-    #     joint_drive=sim_utils.UrdfConverterCfg.JointDriveCfg(
-    #         gains=sim_utils.UrdfConverterCfg.JointDriveCfg.PDGainsCfg(stiffness=0, damping=0)
-    #     ),
-    # ),
-
-
-    # urdf -> usd
-    spawn=sim_utils.UsdFileCfg(
-        usd_path=f"{TEMPLATE_ASSETS_DATA_DIR}/urdf/so_arm101_camera.usd",
+    spawn=sim_utils.UrdfFileCfg(
+        fix_base=True,
+        replace_cylinders_with_capsules=True,
+        asset_path=f"{TEMPLATE_ASSETS_DATA_DIR}/urdf/so_arm101.urdf",
+        activate_contact_sensors=False, # set as false while waiting for capsule implementation
         rigid_props=sim_utils.RigidBodyPropertiesCfg(
             disable_gravity=False,
             max_depenetration_velocity=5.0,
@@ -42,9 +24,26 @@ SO_ARM101_CFG = ArticulationCfg(
             enabled_self_collisions=True,
             solver_position_iteration_count=8,
             solver_velocity_iteration_count=0,
+        ),
+        joint_drive=sim_utils.UrdfConverterCfg.JointDriveCfg(
+            gains=sim_utils.UrdfConverterCfg.JointDriveCfg.PDGainsCfg(stiffness=0, damping=0)
+        ),
     ),
-    activate_contact_sensors=False,
-),
+
+
+#     spawn=sim_utils.UsdFileCfg(
+#         usd_path=f"{TEMPLATE_ASSETS_DATA_DIR}/urdf/so_arm101_camera.usd",
+#         rigid_props=sim_utils.RigidBodyPropertiesCfg(
+#             disable_gravity=False,
+#             max_depenetration_velocity=5.0,
+#         ),
+#         articulation_props=sim_utils.ArticulationRootPropertiesCfg(
+#             enabled_self_collisions=True,
+#             solver_position_iteration_count=8,
+#             solver_velocity_iteration_count=0,
+#     ),
+#     activate_contact_sensors=False,
+# ),
     init_state=ArticulationCfg.InitialStateCfg(
         rot=(1.0, 0.0, 0.0, 0.0),
         joint_pos={
