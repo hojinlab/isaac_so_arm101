@@ -139,7 +139,7 @@ class ObservationsCfg:
         actions = ObsTerm(func=mdp.last_action)
 
         # add: camera
-        object_pos_cam = ObsTerm(func=stare_mdp.red_block_centroid_in_camera)
+        object_pos_cam = ObsTerm(func=stare_mdp.object_position_in_camera_frame)
 
         def __post_init__(self):
             self.enable_corruption = True

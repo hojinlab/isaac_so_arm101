@@ -52,6 +52,24 @@ def object_position_in_robot_root_frame(
 #     object_pos_cam, _ = subtract_frame_transforms(camera_pos_w, camera_quat_w, object_pos_w)
 #
 #     return object_pos_cam
+def object_position_in_camera_frame(
+    env: ManagerBasedRLEnv,
+    camera_cfg: SceneEntityCfg = SceneEntityCfg("camera"),
+    object_cfg: SceneEntityCfg = SceneEntityCfg("object"),
+    ) -> torch.Tensor:
+ 
+    camera: Camera = env.scene[camera_cfg.name]
+    object: RigidObject = env.scene[object_cfg.name]
+ 
+    camera_pos_w = camera.data.pos_w
+    camera_quat_w = camera.data.quat_w_world
+ 
+    object_pos_w = object.data.root_pos_w[:, :3]
+    object_pos_cam, _ = subtract_frame_transforms(camera_pos_w, camera_quat_w, object_pos_w)
+ 
+    # y, z 성분만 반환 → shape (num_envs, 2), 기존 체크포인트 obs shape 유지
+    return object_pos_cam[:, 1:3]
+
 
 def red_block_centroid_in_camera(
     env: ManagerBasedRLEnv,
