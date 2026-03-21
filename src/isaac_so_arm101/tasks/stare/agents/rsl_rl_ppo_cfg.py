@@ -19,7 +19,7 @@ from isaaclab_rl.rsl_rl import (
 @configclass
 class StarePPORunnerCfg(RslRlOnPolicyRunnerCfg):
     num_steps_per_env = 24
-    max_iterations = 1000
+    max_iterations = 3001
     save_interval = 50
     experiment_name = "stare"
     run_name = ""

@@ -31,6 +31,7 @@ from isaaclab.utils.assets import ISAAC_NUCLEUS_DIR
 from isaaclab.utils.noise import AdditiveUniformNoiseCfg as Unoise
 from isaaclab.sensors import CameraCfg
 from isaaclab.sensors import TiledCameraCfg
+from isaaclab.utils.noise import GaussianNoiseCfg
 
 ##
 # Scene definition
@@ -136,10 +137,16 @@ class ObservationsCfg:
         joint_pos = ObsTerm(func=mdp.joint_pos_rel, noise=Unoise(n_min=-0.01, n_max=0.01))
         joint_vel = ObsTerm(func=mdp.joint_vel_rel, noise=Unoise(n_min=-0.01, n_max=0.01))
         # pose_command = ObsTerm(func=mdp.generated_commands, params={"command_name": "ee_pose"})
-        actions = ObsTerm(func=mdp.last_action)
+        actions = ObsTerm(
+            func=mdp.last_action,
+            noise=GaussianNoiseCfg(mean=0.0, std=0.005),
+        )
 
         # add: camera
-        object_pos_cam = ObsTerm(func=stare_mdp.object_position_in_camera_frame)
+        object_pos_cam = ObsTerm(
+            func=stare_mdp.object_position_in_camera_frame,
+            noise=GaussianNoiseCfg(mean=0.0, std=0.005),
+        )
 
         def __post_init__(self):
             self.enable_corruption = True
@@ -166,9 +173,48 @@ class EventCfg:
         func=mdp.reset_root_state_uniform,
         mode="reset",
         params={
-            "pose_range": {"x": (0.1, 0.8), "y": (-0.4, 0.4), "z": (0.0, 0.0)},
-            "velocity_range": {},
             "asset_cfg": SceneEntityCfg("object"),
+            "pose_range": {
+                "x": (0.1, 0.8),
+                "y": (-0.4, 0.4),
+                "z": (0.0, 0.0)
+            },
+            "velocity_range": {},
+        },
+    )
+
+    # randomize_joint_friction = EventTerm(
+    #     func=mdp.randomize_joint_parameters,
+    #     mode="reset",
+    #     params={
+    #         "asset_cfg": SceneEntityCfg("robot"),
+    #         "friction_distribution_params": (0.5, 1.5),
+    #         "operation": "scale",
+    #         "distribution": "uniform",
+    #     },
+    # )
+
+    randomize_actuator_gains = EventTerm(
+        func=mdp.randomize_actuator_gains,
+        mode="reset",
+        params={
+            "asset_cfg": SceneEntityCfg("robot"),
+            "stiffness_distribution_params": (0.8, 1.2),
+            "damping_distribution_params": (0.8, 1.2),
+            "operation": "scale",
+            "distribution": "uniform",
+        },
+    )
+
+    randomize_object_material = EventTerm(
+        func=mdp.randomize_rigid_body_material,
+        mode="reset",
+        params={
+            "asset_cfg": SceneEntityCfg("object"),
+            "static_friction_range": (0.3, 1.0),
+            "dynamic_friction_range": (0.2, 0.8),
+            "restitution_range": (0.0, 0.4),
+            "num_buckets": 64,
         },
     )
 
@@ -205,7 +251,7 @@ class RewardsCfg:
     camera_alignment = RewTerm(
         func=stare_mdp.centroid_center_reward,
         weight=1.0,
-        params={"std": 1.0},
+        params={"std": 0.8},
     )
 
 
