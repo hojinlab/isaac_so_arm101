@@ -27,6 +27,7 @@
 wheels/
 dist/
 *.py[oc]
+pyrightconfig.json
 
 # Outputs
 **/output/*

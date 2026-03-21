@@ -58,11 +58,6 @@ def main():
             actions = torch.zeros(env.action_space.shape, device=env.unwrapped.device)
             # apply actions
             env.step(actions)
-            
-            seg = env.unwrapped.scene["camera"].data.output["semantic_segmentation"]
-            info = env.unwrapped.scene["camera"].data.info
-            print(f"seg shape: {seg.shape}, unique values: {seg.unique()}")
-            print(info)
 
     # close the simulator
     env.close()
