@@ -19,7 +19,7 @@ from isaaclab_rl.rsl_rl import (
 @configclass
 class LiftCubePPORunnerCfg(RslRlOnPolicyRunnerCfg):
     num_steps_per_env = 24
-    max_iterations = 1500
+    max_iterations = 1501
     save_interval = 50
     experiment_name = "lift"
     empirical_normalization = False

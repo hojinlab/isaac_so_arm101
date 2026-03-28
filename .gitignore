@@ -49,6 +49,7 @@ runs/
 recordings/
 **/logs/*
 logs/
+sim2real
 
 # Pre-Trained Checkpoints
 /.pretrained_checkpoints/

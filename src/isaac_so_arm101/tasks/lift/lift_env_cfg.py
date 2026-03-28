@@ -33,6 +33,8 @@ from isaaclab.sensors.frame_transformer.frame_transformer_cfg import FrameTransf
 from isaaclab.sim.spawners.from_files.from_files_cfg import GroundPlaneCfg, UsdFileCfg
 from isaaclab.utils import configclass
 from isaaclab.utils.assets import ISAAC_NUCLEUS_DIR
+from isaaclab.sensors import TiledCameraCfg
+from isaaclab.utils.noise import GaussianNoiseCfg
 
 # from isaaclab.utils.offset import OffsetCfg
 # from isaaclab.utils.noise import AdditiveUniformNoiseCfg as Unoise
@@ -78,6 +80,40 @@ class ObjectTableSceneCfg(InteractiveSceneCfg):
         prim_path="/World/light",
         spawn=sim_utils.DomeLightCfg(color=(0.75, 0.75, 0.75), intensity=3000.0),
     )
+
+    robot_camera = TiledCameraCfg(
+        # prim_path="{ENV_REGEX_NS}/Robot/so101_new_calib/gripper_link/Camera",
+        prim_path="{ENV_REGEX_NS}/Robot/gripper_link/RobotCamera",
+        height=480,
+        width=640,
+        data_types=["rgb", "semantic_segmentation"],
+        spawn=sim_utils.PinholeCameraCfg(
+            focal_length=18.147562,
+            clipping_range=(0.01, 1e7),
+        ),
+        offset=TiledCameraCfg.OffsetCfg(
+            pos=(0.0, -0.06, 0.0),
+            rot=(0.0, 0.0, -0.13053, 0.99144),
+            convention="opengl",
+        ),
+    )
+
+    # stand_camera = TiledCameraCfg(
+    #     # prim_path="{ENV_REGEX_NS}/Robot/so101_new_calib/gripper_link/Camera",
+    #     prim_path="{ENV_REGEX_NS}/Robot/base_link/StandCamera",
+    #     height=480,
+    #     width=640,
+    #     data_types=["rgb", "semantic_segmentation"],
+    #     spawn=sim_utils.PinholeCameraCfg(
+    #         focal_length=18.147562,
+    #         clipping_range=(0.01, 1e7),
+    #     ),
+    #     offset=TiledCameraCfg.OffsetCfg(
+    #         pos=(0.5, 0.0, 0.3),
+    #         rot=(0.0, 0.0, 0.13053, 0.99144),
+    #         convention="world",
+    #     ),
+    # )
 
 
 ##
