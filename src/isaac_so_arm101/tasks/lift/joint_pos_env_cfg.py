@@ -10,6 +10,7 @@
 
 import isaaclab_tasks.manager_based.manipulation.lift.mdp as mdp
 from isaaclab.assets import RigidObjectCfg
+from isaaclab.assets import AssetBaseCfg
 
 # from isaaclab.managers NotImplementedError
 from isaaclab.sensors.frame_transformer.frame_transformer_cfg import (
@@ -144,6 +145,17 @@ class SoArm101LiftCubeEnvCfg(LiftEnvCfg):
                 ),
             ),
         )
+
+        # self.scene.stand = RigidObjectCfg(
+        #     prim_path="{ENV_REGEX_NS}/RealSense",
+        #     init_state=AssetBaseCfg.InitialStateCfg(pos=[0.1, 0.1, 0.1], rot=[1, 0, 0, 0]),
+        #     spawn=UsdFileCfg(
+        #         usd_path=f"{ISAAC_NUCLEUS_DIR}/Sensors/Intel/RealSense/rsd455.usd",
+        #         rigid_props=RigidBodyPropertiesCfg(
+        #             rigid_body_enabled=False,
+        #         ),
+        #     ),
+        # )
 
         # Listens to the required transforms
         marker_cfg = FRAME_MARKER_CFG.copy()
