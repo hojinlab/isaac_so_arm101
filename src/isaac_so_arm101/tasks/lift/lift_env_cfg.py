@@ -81,12 +81,12 @@ class ObjectTableSceneCfg(InteractiveSceneCfg):
         spawn=sim_utils.DomeLightCfg(color=(0.75, 0.75, 0.75), intensity=3000.0),
     )
 
-    robot_camera = TiledCameraCfg(
+    camera = TiledCameraCfg(
         # prim_path="{ENV_REGEX_NS}/Robot/so101_new_calib/gripper_link/Camera",
-        prim_path="{ENV_REGEX_NS}/Robot/gripper_link/RobotCamera",
+        prim_path="{ENV_REGEX_NS}/Robot/gripper_link/camera",
         height=480,
         width=640,
-        data_types=["rgb"],
+        data_types=["rgb", "distance_to_camera", "semantic_segmentation"],
         spawn=sim_utils.PinholeCameraCfg(
             focal_length=18.147562,
             clipping_range=(0.01, 1e7),
@@ -115,22 +115,22 @@ class ObjectTableSceneCfg(InteractiveSceneCfg):
     #     ),
     # )
 
-    stand_camera = TiledCameraCfg(
-        # prim_path="{ENV_REGEX_NS}/Robot/so101_new_calib/gripper_link/Camera",
-        prim_path="{ENV_REGEX_NS}/Robot/base_link/StandCamera",
-        height=480,
-        width=640,
-        data_types=["rgb", "distance_to_camera"],
-        spawn=sim_utils.PinholeCameraCfg(
-            focal_length=18.147562,
-            clipping_range=(0.01, 1e7),
-        ),
-        offset=TiledCameraCfg.OffsetCfg(
-            pos=(0.0, 0.0, 0.6),
-            rot=(0.64086, 0.29884, -0.29884, -0.64086),
-            convention="opengl",
-        ),
-    )
+    # stand_camera = TiledCameraCfg(
+    #     # prim_path="{ENV_REGEX_NS}/Robot/so101_new_calib/gripper_link/Camera",
+    #     prim_path="{ENV_REGEX_NS}/Robot/base_link/StandCamera",
+    #     height=480,
+    #     width=640,
+    #     data_types=["rgb", "distance_to_camera"],
+    #     spawn=sim_utils.PinholeCameraCfg(
+    #         focal_length=18.147562,
+    #         clipping_range=(0.01, 1e7),
+    #     ),
+    #     offset=TiledCameraCfg.OffsetCfg(
+    #         pos=(0.0, 0.0, 0.6),
+    #         rot=(0.64086, 0.29884, -0.29884, -0.64086),
+    #         convention="opengl",
+    #     ),
+    # )
 
 ##
 # MDP settings
